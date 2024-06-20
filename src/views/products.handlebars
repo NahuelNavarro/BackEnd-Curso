@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
+</head>
+
+<body>
+    {{#if usuario}}
+            <p>HOLA!<strong>{{usuario.nombre}}</strong> BIENVENIDO STORE!!</p>
+    {{/if}}
+    <h1>Listado de Productos</h1>
+    <input type="text" value="{{carrito._id}}" id="carrito">
+    <ul>
+        {{#each productos}}
+        <li>{{title}} - Precio: {{price}} - Stock {{stock}} <button onclick="comprar('{{_id}}')">Agregar</button> </li>
+        {{/each}}
+    </ul>
+
+    {{#if totalPages}}
+    <ul class="pagination">
+        {{#if hasPrevPage}}
+        <li><a href="/products?pagina=1">&laquo; Primera</a></li>
+        <li><a href="/products?pagina={{prevPage}}">&laquo; Anterior</a></li>
+        {{else}}
+        <li class="disabled"><span>&laquo; Primera</span></li>
+        <li class="disabled"><span>&laquo; Anterior</span></li>
+        {{/if}}
+
+        {{#each totalPages}}
+        {{#ifCond this ../currentPage}}
+        <li class="active"><span>{{this}}</span></li>
+        {{else}}
+        <li><a href="/products?pagina={{this}}">{{this}}</a></li>
+        {{/ifCond}}
+        {{/each}}
+
+        {{#if hasNextPage}}
+        <li><a href="/products?pagina={{nextPage}}">Siguiente &raquo;</a></li>
+        <li><a href="/products?pagina={{totalPages}}">Última &raquo;</a></li>
+        {{else}}
+        <li class="disabled"><span>Siguiente &raquo;</span></li>
+        <li class="disabled"><span>Última &raquo;</span></li>
+        {{/if}}
+    </ul>
+    {{else}}
+    <p>No hay productos disponibles.</p>
+    {{/if}}
+    {{>menu}}
+
+</body>
+
+</html>
+<a href="/carrito/{{carrito._id}}">Ver carrito</a>
+
+<script src="/js/products.js"></script>

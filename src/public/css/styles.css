@@ -1,0 +1,75 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    
+}
+
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+/*Formulario*/
+
+.container {
+    width: 30%; /* Ancho del contenedor */
+    margin: auto; /* Centrar el contenedor */
+    padding: 20px; /* Espacio interior del contenedor */
+    border: 1px solid #ccc; /* Borde alrededor del contenedor */
+    border-radius: 5px; /* Bordes redondeados */
+  }
+  
+  h2 {
+    text-align: center; /* Centrar el título */
+  }
+  
+  .form-group {
+    margin-bottom: 20px; /* Espacio entre grupos de campos */
+  }
+  
+  label {
+    display: block; /* Mostrar cada etiqueta en una línea nueva */
+    margin-bottom: 5px; /* Espacio entre la etiqueta y el campo */
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    width:95%; /* Ancho completo del campo */
+    padding: 10px; /* Espacio interior del campo */
+    border: 1px solid #ccc; /* Borde del campo */
+    border-radius: 5px; /* Bordes redondeados */
+  }
+  
+  button[type="submit"] {
+    width: 100%; /* Ancho completo del botón */
+    padding: 10px; /* Espacio interior del botón */
+    background-color: #007bff; /* Color de fondo del botón */
+    color: #fff; /* Color del texto del botón */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Cambiar el cursor al pasar por encima */
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #0056b3; /* Color de fondo del botón al pasar por encima */
+  }
+  
