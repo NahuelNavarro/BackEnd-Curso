@@ -14,7 +14,6 @@ router.delete('/:cid/products/:pid', deleteProductInCart)
 router.delete('/:cid', deleteAllItemsInCart ) //ok
 
 router.put('/:cid/products/:pid', updateQuantityProductById ) //ok
-.
 
 
 
