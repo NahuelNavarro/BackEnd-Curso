@@ -1,13 +1,13 @@
 import passport from "passport";
 import local from "passport-local";
 import github from "passport-github2";
-import { UsuarioManager } from "../dao/usuarioManager.js";
+import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
 import { generaHash, validaPassword } from "../utils.js";
 import CartManager from "../dao/CartManager.js";
-import { cartModel } from "../data/models/carts.js";
+import { cartModel } from "../dao/models/carts.js";
 import { cartManagerMongo } from "../dao/CartMongoManager.js";
 
-const usuariosManager = new UsuarioManager();
+const usuariosManager = new UsuarioMongoManager();
 const cartmanager = new cartManagerMongo();
 
 

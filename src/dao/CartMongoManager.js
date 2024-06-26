@@ -1,11 +1,19 @@
-import { cartModel } from "../data/models/carts.js";
-import { productModel } from "../data/models/products.js";
+import { cartModel } from "./models/carts.js";
+import { productModel } from "./models/products.js";
+import mongoose from "mongoose";
 
 export class cartManagerMongo {
 
-    async getByOne() {
-        return await cartModel.findOne().populate("products.product")
+    async getByOne(cid) {
+        try {
+            const cart = await cartModel.findOne({ _id: cid }).populate("products.product").lean();
+            return cart;
+        } catch (error) {
+            console.error("Error al obtener el carrito por id:", error);
+            throw error;
+        }
     }
+    
 
     async create(){
         let carrito = await cartModel.create({ products: [] });

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { productModel } from "../data/models/products.js";
-import { ManagerMongo } from "../dao/ProductManagerMongo.js";
+import { productModel } from "../dao/models/products.js";
+import { ManagerMongo } from "../dao/ProductMongoManager.js";
 import { auth } from "../middleware/auth.js";
 import { createCart, getCartById } from "../controllers/carts.js";
 import { cartManagerMongo } from "../dao/CartMongoManager.js";

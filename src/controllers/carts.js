@@ -1,7 +1,18 @@
 import { request, response } from "express";
-import { cartModel } from "../data/models/carts.js";
-import { productModel } from "../data/models/products.js";
+import { cartModel } from "../dao/models/carts.js";
+import { productModel } from "../dao/models/products.js";
 import { isValidObjectId } from "mongoose";
+import { cartManagerMongo } from "../dao/CartMongoManager.js";
+import { ManagerMongo } from "../dao/ProductMongoManager.js";
+import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
+import mongoose from "mongoose";
+import { ordenesModelo } from "../dao/models/ordenes.js";
+
+
+const cartManager = new cartManagerMongo
+const productManager = new ManagerMongo
+const userManager = new UsuarioMongoManager
+
 
 export const getCartById = async (req = request, res = response) => {
     try {
@@ -9,11 +20,11 @@ export const getCartById = async (req = request, res = response) => {
         if (!isValidObjectId(cid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-        const carrito = await cartModel.findById(cid)
+        const carrito = await cartManager.getOneByPopulate(cid)
         if (carrito)
             return res.json({ carrito });
         return res.status(404).json({ msg: ` el carrito con ${cid} no existe` })
-    
+
 
     } catch (error) {
         console.log('getCartById => ', error)
@@ -42,18 +53,19 @@ export const addProductInCart = async (req = request, res = response) => {
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-    
+
 
         const carrito = await cartModel.findById(cid).populate('products.product');
 
         if (!carrito)
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
+        let product = await productModel.findById(pid);
 
         let productoInCart = carrito.products.find(p => p.product._id.toString() === pid);
-        if (productoInCart) {
+        if (productoInCart)
             productoInCart.quantity++;
-        } else {
-            const product = await productModel.findById(pid);
+
+        else {
             if (!product)
                 return res.status(404).json({ msg: `El producto con id ${pid} no existe` });
 
@@ -63,7 +75,7 @@ export const addProductInCart = async (req = request, res = response) => {
         await carrito.save();
 
         return res.json({ msg: `Carrito actualizado`, carrito });
-        
+
     } catch (error) {
         console.log('addProductInCart => ', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
@@ -81,14 +93,14 @@ export const deleteProductInCart = async (req, res) => {
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-    
+
         const carrito = await cartModel.findById(cid);
 
         if (!carrito) {
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
         }
 
-        const productoAEliminar = carrito.products.find(producto => producto.product._id.toString() === pid); 
+        const productoAEliminar = carrito.products.find(producto => producto.product._id.toString() === pid);
         if (!productoAEliminar) {
             return res.status(404).json({ msg: `El producto con id ${pid} no existe en el carrito` });
         }
@@ -96,7 +108,7 @@ export const deleteProductInCart = async (req, res) => {
         carrito.products = carrito.products.filter(producto => producto.product._id.toString() !== pid);
         console.log(carrito.products)
         await carrito.save();
-        
+
 
         return res.json({ msg: `Producto borrado`, carrito });
 
@@ -113,7 +125,7 @@ export const deleteAllItemsInCart = async (req = request, res = response) => {
         if (!isValidObjectId(cid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-    
+
         const carrito = await cartModel.findById(cid);
 
         if (!carrito)
@@ -142,7 +154,7 @@ export const updateQuantityProductById = async (req = request, res = response) =
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-    
+
 
         // Buscar el carrito por su ID
         const carrito = await cartModel.findById(cid).populate("products.product");
@@ -176,3 +188,68 @@ export const updateQuantityProductById = async (req = request, res = response) =
 
 
 
+export const purchaseCart = async (req, res) => {
+    const { cid } = req.params;
+
+    try {
+        // Busca el carrito y popula los productos
+        const carrito = await cartModel.findById(cid).populate('products.product');
+
+        // Validación de existencia de carrito
+        if (!carrito) {
+            return res.status(404).json({ msg: 'Carrito no encontrado' });
+        }
+
+        // Validación de productos y stock
+        const productos = await productManager.getAll();
+        for (let item of carrito.products) {
+            const producto = productos.find(p => p._id.toString() === item.product._id.toString());
+            if (!producto) {
+                return res.status(404).json({ msg: `Producto con ID ${item.product._id} no encontrado` });
+            }
+            if (producto.stock < item.quantity) {
+                return res.status(400).json({ msg: `No hay suficiente stock para el producto ${producto.title}` });
+            }
+            // Actualiza el stock del producto
+            producto.stock -= item.quantity;
+            // Guarda el producto actualizado en la base de datos
+            await producto.save();
+        }
+
+       
+        // Obtén el usuario propietario del carrito
+        const usuario = await userManager.findOne(carrito.usuario);
+
+        // Validación de existencia de usuario
+        if (!usuario) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        // Creación de nueva orden
+        const nuevaOrden = {
+            usuario: usuario._id,
+            productos: carrito.products.map(item => ({
+                product: item.product._id,
+                quantity: item.quantity,
+                price: item.product.price
+            })),
+            total: carrito.products.reduce((acc, item) => acc + (item.product.price * item.quantity), 0),
+            createdAt: new Date()
+        };
+
+        // Guarda la nueva orden en la base de datos
+        const ordenCreada = await ordenesModelo.create(nuevaOrden);
+        console.log(ordenCreada)
+
+        // Agrega la orden a la lista de órdenes del usuario
+        usuario.ordenes.push(ordenCreada._id);
+        await usuario.save();
+
+        // Respuesta exitosa
+        return res.status(200).json({ msg: 'Compra realizada con éxito', orden: ordenCreada });
+
+    } catch (error) {
+        console.error('Error en purchaseCart:', error);
+        return res.status(500).json({ msg: 'Hablar con el admin' });
+    }
+};

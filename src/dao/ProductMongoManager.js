@@ -1,9 +1,9 @@
-import { productModel } from "../data/models/products.js";
+import { productModel } from "./models/products.js";
 
 export class ManagerMongo {
 
-    async getall() {
-        return await productModel.find().lean()
+    async getAll() {
+        return await productModel.find()
     }
 
     async getAllPaginate(page = 1){

@@ -1,9 +1,9 @@
 import { request, response } from "express";
-import { UsuarioManager } from "../dao/usuarioManager.js";
+import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
 import { generaHash } from "../utils.js";
 
-const usuariosManager = new UsuarioManager();
-
+const usuariosManager = new UsuarioMongoManager();
+const usuariosService = new UsuarioMongoManager()
 
 // Obtener lista de productos con paginación, filtrado y ordenamiento
 export const registrarUsuario = async (req = request, res = response) => {
@@ -101,6 +101,12 @@ export const logOut = async (req = request, res = response) => {
 
 export const error = async (req = request, res = response) => {
 
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).json({ payload: "error" })
+}
+
+export const getUsers = async (req = request, res = response) => {
+let usuarios= await usuariosService.get()
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({ payload: "error" })
 }

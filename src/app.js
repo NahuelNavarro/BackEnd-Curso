@@ -3,11 +3,13 @@ import express from 'express';
 import { Server } from 'socket.io';
 import { engine } from 'express-handlebars';
 import { dbConnection } from './database/config.js';
-import { productModel } from './data/models/products.js';
-import { messageModel } from './data/models/messages.js';
+import { productModel } from './dao/models/products.js';
+import { messageModel } from './dao/models/messages.js';
 import { router as productosRouter } from './routes/products.router.js';
 import { router as cartsRouter } from './routes/cart.router.js';
 import { router as vistasRouter } from './routes/views.router.js';
+import { router as ordenesRouter } from './routes/ordenes.router.js';
+
 import __dirname from './utils.js';
 import session from 'express-session';
 import { router as sessionRouter } from './routes/session.router.js';
@@ -46,6 +48,8 @@ app.use('/api/session', sessionRouter)
 // Rutas de la API
 app.use("/api/productos", productosRouter);
 app.use("/api/carts", cartsRouter);
+app.use("/api/ordenes", ordenesRouter);
+
 
 
 
