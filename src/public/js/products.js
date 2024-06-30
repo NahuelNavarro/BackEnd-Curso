@@ -2,7 +2,7 @@ const comprar = async (pid) => {
     let inPutCarrito = document.getElementById("carrito")
     let cid = inPutCarrito.value
     console.log(`codigo producto ${pid}, codigo carrito ${cid}`)
-
+    alert("producto agregado al carrito")
     let res = await fetch (`/api/carts/${cid}/product/${pid}`,{method:"post"})
     if(res.status == 200 ){
         let datos = await res.json()

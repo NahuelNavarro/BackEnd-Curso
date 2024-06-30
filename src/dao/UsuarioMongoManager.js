@@ -25,7 +25,7 @@ export class UsuarioMongoManager {
 
     async update(id,usuario) {
         return await usuarioModelo.updateOne({_id:id},usuario)
-     }
+    }
 
      async findOne(id) {
         try {

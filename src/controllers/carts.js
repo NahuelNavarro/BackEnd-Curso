@@ -187,61 +187,62 @@ export const updateQuantityProductById = async (req = request, res = response) =
 }//ok
 
 
-
 export const purchaseCart = async (req, res) => {
     const { cid } = req.params;
 
     try {
-        // Busca el carrito y popula los productos
+        // Obtener el carrito y poblar los productos
         const carrito = await cartModel.findById(cid).populate('products.product');
-
-        // Validación de existencia de carrito
+        
+        // Validar la existencia del carrito
         if (!carrito) {
             return res.status(404).json({ msg: 'Carrito no encontrado' });
         }
 
-        // Validación de productos y stock
+        // Validar existencia y stock de los productos
         const productos = await productManager.getAll();
-        for (let item of carrito.products) {
+
+        for (const item of carrito.products) {
             const producto = productos.find(p => p._id.toString() === item.product._id.toString());
+
             if (!producto) {
                 return res.status(404).json({ msg: `Producto con ID ${item.product._id} no encontrado` });
             }
             if (producto.stock < item.quantity) {
                 return res.status(400).json({ msg: `No hay suficiente stock para el producto ${producto.title}` });
             }
-            // Actualiza el stock del producto
+
+            // Actualizar el stock del producto
             producto.stock -= item.quantity;
-            // Guarda el producto actualizado en la base de datos
+            // Guardar el producto actualizado en la base de datos
             await producto.save();
         }
 
-       
-        // Obtén el usuario propietario del carrito
+        // Obtener el propietario del carrito
         const usuario = await userManager.findOne(carrito.usuario);
 
-        // Validación de existencia de usuario
+        // Validar la existencia del usuario
         if (!usuario) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
 
-        // Creación de nueva orden
+        // Crear una nueva orden
         const nuevaOrden = {
             usuario: usuario._id,
-            productos: carrito.products.map(item => ({
-                product: item.product._id,
-                quantity: item.quantity,
-                price: item.product.price
+            pedido: carrito.products.map(item => ({
+                productId: item.product._id,
+                descripcion: item.product.title,
+                cantidad: item.quantity,
+                precio: item.product.price
             })),
             total: carrito.products.reduce((acc, item) => acc + (item.product.price * item.quantity), 0),
             createdAt: new Date()
         };
 
-        // Guarda la nueva orden en la base de datos
+        // Guardar la nueva orden en la base de datos
         const ordenCreada = await ordenesModelo.create(nuevaOrden);
-        console.log(ordenCreada)
 
-        // Agrega la orden a la lista de órdenes del usuario
+        // Añadir la orden a la lista de órdenes del usuario
         usuario.ordenes.push(ordenCreada._id);
         await usuario.save();
 
