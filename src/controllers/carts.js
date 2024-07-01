@@ -186,6 +186,18 @@ export const updateQuantityProductById = async (req = request, res = response) =
     }
 }//ok
 
+import nodemailer from "nodemailer"
+
+const transporter = nodemailer.createTransport({
+    service:"gmail",
+    port: "587",
+    auth:{
+        user:"navarronahuelezequiel@gmail.com",
+        pass: "weaisaorqlkoqwhm"
+    }
+});
+
+
 
 export const purchaseCart = async (req, res) => {
     const { cid } = req.params;
@@ -220,6 +232,8 @@ export const purchaseCart = async (req, res) => {
 
         // Obtener el propietario del carrito
         const usuario = await userManager.findOne(carrito.usuario);
+        const idUsuarioCart = await cartManager.getByOne(usuario.carrito)
+        console.log(idUsuarioCart)
 
         // Validar la existencia del usuario
         if (!usuario) {
@@ -245,6 +259,16 @@ export const purchaseCart = async (req, res) => {
         // Añadir la orden a la lista de órdenes del usuario
         usuario.ordenes.push(ordenCreada._id);
         await usuario.save();
+
+        // Enviar correo electrónico
+        const mailOptions = {
+            from: 'Ecommerce',
+            to: usuario.email,
+            subject: 'Confirmación de compra',
+            text: `Hola ${usuario.nombre},\n\nTu compra ha sido realizada con éxito. Aquí tienes los detalles de tu orden:\n\n${nuevaOrden.pedido.map(item => `Producto: ${item.descripcion}, Cantidad: ${item.cantidad}, Precio: ${item.precio}`).join('\n')}\n\nTotal: ${nuevaOrden.total}\n\nGracias por tu compra!`
+        };
+
+        await transporter.sendMail(mailOptions);
 
         // Respuesta exitosa
         return res.status(200).json({ msg: 'Compra realizada con éxito', orden: ordenCreada });

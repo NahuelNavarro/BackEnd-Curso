@@ -32,8 +32,14 @@ export const registrarUsuario = async (req = request, res = response) => {
         // Generar el hash de la contraseña
         password = generaHash(password);
 
+        // Crear un nuevo carrito
+        const nuevoCarrito = await cartModel.create({ products: [] });
+
         // Crear un nuevo usuario
-        let nuevoUsuario = await usuariosManager.create({ nombre, email, password });
+        let nuevoUsuario = await usuariosManager.create({ nombre, email, password, carrito: nuevoCarrito._id });
+
+        // Actualizar el carrito para asociarlo al nuevo usuario
+        await cartModel.findByIdAndUpdate(nuevoCarrito._id, { $set: { user: nuevoUsuario._id } });
 
         res.setHeader('Content-Type', 'application/json');
         return res.status(201).json({ mensaje: `Registro correcto`, usuario: nuevoUsuario });
@@ -44,9 +50,7 @@ export const registrarUsuario = async (req = request, res = response) => {
         return res.status(500).json(
             { error: `Error inesperado detalle: ${error.message}` });
     }
-
 }
-
 export const loginUsuario = async (req = request, res = response) => {
     let { email, password, web } = req.body
 

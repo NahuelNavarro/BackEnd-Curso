@@ -42,5 +42,22 @@ export class UsuarioMongoManager {
             throw error;
         }
     }
+
+async findById(id) {
+    try {
+        // Usar findById para buscar el usuario por su campo _id
+        const usuario = await usuarioModelo.findById(id).lean();
+
+        if (!usuario) {
+            console.log('Usuario no encontrado');
+            return null;
+        }
+
+        return usuario;
+    } catch (error) {
+        console.error('Error al buscar el usuario por ID:', error);
+        throw error;
+    }
+}
     
 }
