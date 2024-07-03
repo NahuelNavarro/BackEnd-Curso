@@ -27,15 +27,14 @@ export class UsuarioMongoManager {
         return await usuarioModelo.updateOne({_id:id},usuario)
     }
 
-     async findOne(id) {
+    async findOne(id) {
         try {
-            
-            const usuario = await usuarioModelo.findOne({  id });
+            const usuario = await usuarioModelo.findOne({ carrito: id });
             if (!usuario) {
                 console.log('Usuario no encontrado');
                 return null;
             }
-
+    
             return usuario;
         } catch (error) {
             console.error('Error al buscar el usuario:', error);

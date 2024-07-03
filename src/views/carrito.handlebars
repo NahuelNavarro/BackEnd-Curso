@@ -2,8 +2,10 @@
 
 <ul>
   {{#each carrito.products}}
-    <li>{{this.product.title}} - Cantidad: {{this.quantity}} - Precio ${{this.product.price}}-</li>
+    <li>{{this.product.title}} - Cantidad: {{this.quantity}} - Precio ${{this.product.price}}</li>
   {{/each}}
 </ul>
 
-<button>Finalizar compra</button>
+<button onclick="finalizarCompra('{{carrito._id}}')">Finalizar compra</button>
+
+<script src="/js/carrito.js"></script>

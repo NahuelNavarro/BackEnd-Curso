@@ -203,8 +203,11 @@ export const purchaseCart = async (req, res) => {
     const { cid } = req.params;
 
     try {
+        // Convertir cid a ObjectId usando la palabra clave 'new'
+        const carritoId = new mongoose.Types.ObjectId(cid);
+
         // Obtener el carrito y poblar los productos
-        const carrito = await cartModel.findById(cid).populate('products.product');
+        const carrito = await cartModel.findById(carritoId).populate('products.product');
         
         // Validar la existencia del carrito
         if (!carrito) {
@@ -230,10 +233,9 @@ export const purchaseCart = async (req, res) => {
             await producto.save();
         }
 
-        // Obtener el propietario del carrito
-        const usuario = await userManager.findOne(carrito.usuario);
-        const idUsuarioCart = await cartManager.getByOne(usuario.carrito)
-        console.log(idUsuarioCart)
+        // Obtener el usuario propietario del carrito
+        const usuario = await userManager.findOne(carritoId);
+        console.log(usuario)
 
         // Validar la existencia del usuario
         if (!usuario) {
@@ -253,9 +255,10 @@ export const purchaseCart = async (req, res) => {
             createdAt: new Date()
         };
 
+        
         // Guardar la nueva orden en la base de datos
         const ordenCreada = await ordenesModelo.create(nuevaOrden);
-
+        console.log(ordenCreada)
         // Añadir la orden a la lista de órdenes del usuario
         usuario.ordenes.push(ordenCreada._id);
         await usuario.save();
@@ -277,4 +280,4 @@ export const purchaseCart = async (req, res) => {
         console.error('Error en purchaseCart:', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-};
+};  

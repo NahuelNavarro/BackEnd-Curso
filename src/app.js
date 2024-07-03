@@ -17,6 +17,7 @@ import { initPassport } from './config/passport.config.js';
 import passport from 'passport';
 import { config } from './config/config.js';
 import fs from "fs"
+import { auth } from './middleware/auth.js';
 
 const PORT = config.PORT;
 // Crea una instancia de la aplicación Express
@@ -46,11 +47,9 @@ app.use('/', vistasRouter);
 app.use('/api/session', sessionRouter)
 
 // Rutas de la API
-app.use("/api/productos", productosRouter);
-app.use("/api/carts", cartsRouter);
+app.use("/api/productos",auth, productosRouter);
+app.use("/api/carts",auth, cartsRouter);
 app.use("/api/ordenes", ordenesRouter);
-
-
 
 
 
