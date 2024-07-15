@@ -4,6 +4,8 @@ import github from "passport-github2";
 import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
 import { generaHash, validaPassword } from "../utils.js";
 import { cartManagerMongo } from "../dao/CartMongoManager.js";
+import { userService } from "../repositories/user.service.js";
+import { cartService } from "../repositories/cart.service.js";
 
 const usuariosManager = new UsuarioMongoManager();
 const cartmanager = new cartManagerMongo();
@@ -24,21 +26,21 @@ export const initPassport = () => {
                     if (!nombre) {
                         return done(null, false, { message: "Nombre es requerido" });
                     }
-                    let existe = await usuariosManager.getBy({ email: username });
+                    let existe = await userService.getById({email: username });
                     if (existe) {
                         return done(null, false, { message: "El usuario ya existe" });
                     }
                     password = generaHash(password);
-                    let nuevoCarrito = await cartmanager.create()
+                    let nuevoCarrito = await cartService.createCart()
                     console.log(nuevoCarrito)
-                    let usuario = await usuariosManager.create({ nombre, email: username, password, carrito: nuevoCarrito._id });
+                    let usuario = await userService.createUser({ nombre, email: username, password, carrito: nuevoCarrito._id });
                     return done(null, usuario);
                 } catch (error) {
                     return done(error);
                 }
             }
         )
-    );
+    );//OK
 
     passport.use(
         "login",
@@ -48,7 +50,7 @@ export const initPassport = () => {
             },
             async (username, password, done) => {
                 try {
-                    let usuario = await usuariosManager.getBy({ email: username });
+                    let usuario = await userService.getById({ email: username });
                     if (!usuario) {
                         return done(null, false, { message: "Usuario no encontrado" });
                     }
@@ -66,7 +68,7 @@ export const initPassport = () => {
                 }
             }
         )
-    );
+    ); //OK
 
     passport.use(
         "github",
@@ -109,9 +111,9 @@ export const initPassport = () => {
                         return done(null, false, { message: 'Email not found' });
                     }
 
-                    let usuario = await usuariosManager.getBy({ email });
+                    let usuario = await userService.getById({ email });
                     if (!usuario) {
-                        usuario = await usuariosManager.create({
+                        usuario = await userService.createUser({
                             nombre, email, profile
                         });
                     }
@@ -128,7 +130,7 @@ export const initPassport = () => {
 
     passport.deserializeUser(async (id, done) => {
         try {
-            let usuario = await usuariosManager.getBy({ _id: id });
+            let usuario = await userService.findByIdUser({ _id: id });
             return done(null, usuario);
         } catch (error) {
             return done(error);

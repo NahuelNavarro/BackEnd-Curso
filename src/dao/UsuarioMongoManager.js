@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 
 export class UsuarioMongoManager {
 
-    async create(usuario){
+    async create(usuario) {
         let nuevoUsuario = await usuarioModelo.create(usuario)
         return nuevoUsuario.toJSON()
     }
 
-    async getBy(filtro = {}){
-        return await usuarioModelo.findOne(filtro).lean()
+    async getBy(filtro = {}) {
+        return await usuarioModelo.findOne(filtro).lean();
     }
 
     async getAll() {
@@ -20,11 +20,11 @@ export class UsuarioMongoManager {
     }
 
     async get() {
-       return await usuarioModelo.find().populate("ordenes.orden").lean()
+        return await usuarioModelo.find().populate("ordenes.orden").lean()
     }
 
-    async update(id,usuario) {
-        return await usuarioModelo.updateOne({_id:id},usuario)
+    async update(id, usuario) {
+        return await usuarioModelo.updateOne({ _id: id }, usuario)
     }
 
     async findOne(id) {
@@ -34,7 +34,7 @@ export class UsuarioMongoManager {
                 console.log('Usuario no encontrado');
                 return null;
             }
-    
+
             return usuario;
         } catch (error) {
             console.error('Error al buscar el usuario:', error);
@@ -42,21 +42,21 @@ export class UsuarioMongoManager {
         }
     }
 
-async findById(id) {
-    try {
-        // Usar findById para buscar el usuario por su campo _id
-        const usuario = await usuarioModelo.findById(id).lean();
+    async findById(id) {
+        try {
+            // Usar findById para buscar el usuario por su campo _id
+            const usuario = await usuarioModelo.findById(id).lean();
 
-        if (!usuario) {
-            console.log('Usuario no encontrado');
-            return null;
+            if (!usuario) {
+                console.log('Usuario no encontrado');
+                return null;
+            }
+
+            return usuario;
+        } catch (error) {
+            console.error('Error al buscar el usuario por ID:', error);
+            throw error;
         }
-
-        return usuario;
-    } catch (error) {
-        console.error('Error al buscar el usuario por ID:', error);
-        throw error;
     }
-}
-    
+
 }

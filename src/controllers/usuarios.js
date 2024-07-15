@@ -51,6 +51,7 @@ export const registrarUsuario = async (req = request, res = response) => {
             { error: `Error inesperado detalle: ${error.message}` });
     }
 }
+
 export const loginUsuario = async (req = request, res = response) => {
     let { email, password, web } = req.body
 

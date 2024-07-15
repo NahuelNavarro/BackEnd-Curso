@@ -24,7 +24,13 @@ const PORT = config.PORT;
 const app = express();
 
 // Configura el motor de plantillas Handlebars
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+  // Permitir acceso a propiedades del prototipo
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true
+  }
+}));
 app.set('view engine', 'handlebars');
 app.set('views', __dirname + '/views');
 app.use(session({
@@ -47,8 +53,8 @@ app.use('/', vistasRouter);
 app.use('/api/session', sessionRouter)
 
 // Rutas de la API
-app.use("/api/productos",auth, productosRouter);
-app.use("/api/carts",auth, cartsRouter);
+app.use("/api/productos", productosRouter);
+app.use("/api/carts", cartsRouter);
 app.use("/api/ordenes", ordenesRouter);
 
 

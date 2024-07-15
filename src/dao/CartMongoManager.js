@@ -23,7 +23,7 @@ export class cartManagerMongo {
     async getOneByPopulate(cid) {
         try {
             // Busca un carrito por su id (cid) y popula los productos relacionados
-            const carrito = await cartModel.findById(cid).populate("products.product").lean()
+            const carrito = await cartModel.findById(cid).populate("products.product")
             return carrito
         } catch (error) {
             console.error("Error al obtener el carrito por id:", error);

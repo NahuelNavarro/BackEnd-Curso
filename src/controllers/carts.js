@@ -1,46 +1,42 @@
 import { request, response } from "express";
-import { cartModel } from "../dao/models/carts.js";
-import { productModel } from "../dao/models/products.js";
 import { isValidObjectId } from "mongoose";
-import { cartManagerMongo } from "../dao/CartMongoManager.js";
-import { ManagerMongo } from "../dao/ProductMongoManager.js";
-import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
+import { cartService } from "../repositories/cart.service.js";
+import { productService } from "../repositories/product.service.js"
+import { orderService } from "../repositories/order.service.js";
+import { userService } from "../repositories/user.service.js";
+import { enviarMail } from "../utils.js";
 import mongoose from "mongoose";
-import { ordenesModelo } from "../dao/models/ordenes.js";
-
-
-const cartManager = new cartManagerMongo
-const productManager = new ManagerMongo
-const userManager = new UsuarioMongoManager
 
 
 export const getCartById = async (req = request, res = response) => {
     try {
         const { cid } = req.params;
+
         if (!isValidObjectId(cid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-        const carrito = await cartManager.getOneByPopulate(cid)
+
+        const carrito = await cartService.getCartByIdPopulate(cid)
+
         if (carrito)
             return res.json({ carrito });
         return res.status(404).json({ msg: ` el carrito con ${cid} no existe` })
-
 
     } catch (error) {
         console.log('getCartById => ', error)
         return res.status(500).json({ msg: 'Hablar con el admin' })
     }
-}//ok
+} //OK
 
 export const createCart = async (req = request, res = response) => {
     try {
-        const carrito = await cartModel.create({})
+        const carrito = await cartService.createCart({})
         return res.json({ msg: `carrito creado`, carrito })
     } catch (error) {
         console.log('createCart => ', error)
         return res.status(500).json({ msg: 'Hablar con el admin' })
     }
-}//ok
+} //OK
 
 export const addProductInCart = async (req = request, res = response) => {
     try {
@@ -54,12 +50,12 @@ export const addProductInCart = async (req = request, res = response) => {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
 
-
-        const carrito = await cartModel.findById(cid).populate('products.product');
+        const carrito = await cartService.getCartByIdPopulate(cid)
 
         if (!carrito)
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
-        let product = await productModel.findById(pid);
+        let product = await productService.getProductById(pid)
+        console.log(product)
 
         let productoInCart = carrito.products.find(p => p.product._id.toString() === pid);
         if (productoInCart)
@@ -80,7 +76,7 @@ export const addProductInCart = async (req = request, res = response) => {
         console.log('addProductInCart => ', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-} //ok
+} //OK
 
 export const deleteProductInCart = async (req, res) => {
     try {
@@ -94,7 +90,7 @@ export const deleteProductInCart = async (req, res) => {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
 
-        const carrito = await cartModel.findById(cid);
+        const carrito = await cartService.getCartByIdPopulate(cid);
 
         if (!carrito) {
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
@@ -116,7 +112,7 @@ export const deleteProductInCart = async (req, res) => {
         console.error('deleteProductInCart => ', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-}//ok
+} //OK
 
 export const deleteAllItemsInCart = async (req = request, res = response) => {
     try {
@@ -126,7 +122,7 @@ export const deleteAllItemsInCart = async (req = request, res = response) => {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
 
-        const carrito = await cartModel.findById(cid);
+        const carrito = await cartService.getCartByIdPopulate(cid);
 
         if (!carrito)
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
@@ -140,7 +136,7 @@ export const deleteAllItemsInCart = async (req = request, res = response) => {
         console.log('deleteAllItemsInCart => ', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-}//ok
+} //OK
 
 export const updateQuantityProductById = async (req = request, res = response) => {
     try {
@@ -157,18 +153,21 @@ export const updateQuantityProductById = async (req = request, res = response) =
 
 
         // Buscar el carrito por su ID
-        const carrito = await cartModel.findById(cid).populate("products.product");
+        const carrito = await cartService.getCartByIdPopulate(cid)
+
         if (!carrito)
             return res.status(404).json({ msg: `El carrito con id ${cid} no existe` });
 
         // Buscar el producto en el carrito por su ID
         const productIndex = carrito.products.findIndex(p => p.product._id.toString() === pid);
+
         if (productIndex !== -1) {
             // Si el producto está en el carrito, actualizar su cantidad
             carrito.products[productIndex].quantity = quantity;
         } else {
             // Si el producto no está en el carrito, agregarlo con la cantidad especificada
-            const product = await productModel.findById(pid);
+            const product = await productService.getProductById(pid);
+            
             if (!product)
                 return res.status(404).json({ msg: `El producto con id ${pid} no existe` });
 
@@ -184,20 +183,7 @@ export const updateQuantityProductById = async (req = request, res = response) =
         console.log('updateQuantityProductById => ', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-}//ok
-
-import nodemailer from "nodemailer"
-
-const transporter = nodemailer.createTransport({
-    service:"gmail",
-    port: "587",
-    auth:{
-        user:"navarronahuelezequiel@gmail.com",
-        pass: "weaisaorqlkoqwhm"
-    }
-});
-
-
+} //OK
 
 export const purchaseCart = async (req, res) => {
     const { cid } = req.params;
@@ -207,7 +193,7 @@ export const purchaseCart = async (req, res) => {
         const carritoId = new mongoose.Types.ObjectId(cid);
 
         // Obtener el carrito y poblar los productos
-        const carrito = await cartModel.findById(carritoId).populate('products.product');
+        const carrito = await cartService.getCartByIdPopulate(carritoId)
         
         // Validar la existencia del carrito
         if (!carrito) {
@@ -215,7 +201,7 @@ export const purchaseCart = async (req, res) => {
         }
 
         // Validar existencia y stock de los productos
-        const productos = await productManager.getAll();
+        const productos = await productService.getAllProducts()
 
         for (const item of carrito.products) {
             const producto = productos.find(p => p._id.toString() === item.product._id.toString());
@@ -234,7 +220,7 @@ export const purchaseCart = async (req, res) => {
         }
 
         // Obtener el usuario propietario del carrito
-        const usuario = await userManager.findOne(carritoId);
+        const usuario = await userService.findUser(carritoId);
         console.log(usuario)
 
         // Validar la existencia del usuario
@@ -244,6 +230,7 @@ export const purchaseCart = async (req, res) => {
 
         // Crear una nueva orden
         const nuevaOrden = {
+            nrOrden:Date.now(),
             usuario: usuario._id,
             pedido: carrito.products.map(item => ({
                 productId: item.product._id,
@@ -257,21 +244,14 @@ export const purchaseCart = async (req, res) => {
 
         
         // Guardar la nueva orden en la base de datos
-        const ordenCreada = await ordenesModelo.create(nuevaOrden);
+        const ordenCreada = await orderService.createOrder(nuevaOrden);
         console.log(ordenCreada)
         // Añadir la orden a la lista de órdenes del usuario
         usuario.ordenes.push(ordenCreada._id);
         await usuario.save();
 
-        // Enviar correo electrónico
-        const mailOptions = {
-            from: 'Ecommerce',
-            to: usuario.email,
-            subject: 'Confirmación de compra',
-            text: `Hola ${usuario.nombre},\n\nTu compra ha sido realizada con éxito. Aquí tienes los detalles de tu orden:\n\n${nuevaOrden.pedido.map(item => `Producto: ${item.descripcion}, Cantidad: ${item.cantidad}, Precio: ${item.precio}`).join('\n')}\n\nTotal: ${nuevaOrden.total}\n\nGracias por tu compra!`
-        };
-
-        await transporter.sendMail(mailOptions);
+        // await transporter.sendMail(mailOptions);
+        await enviarMail(usuario.email, "Confirmacion de compra", `Hola ${usuario.nombre},\n\nTu compra ha sido realizada con éxito. Aquí tienes los detalles de tu orden:\n\n${nuevaOrden.pedido.map(item => `Producto: ${item.descripcion}, Cantidad: ${item.cantidad}, Precio: ${item.precio}`).join('\n')}\n\nTotal: ${nuevaOrden.total}\n\nGracias por tu compra!`)
 
         // Respuesta exitosa
         return res.status(200).json({ msg: 'Compra realizada con éxito', orden: ordenCreada });
@@ -280,4 +260,4 @@ export const purchaseCart = async (req, res) => {
         console.error('Error en purchaseCart:', error);
         return res.status(500).json({ msg: 'Hablar con el admin' });
     }
-};  
+} //OK

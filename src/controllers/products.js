@@ -1,6 +1,7 @@
 import { request, response } from "express";
 import { productModel } from "../dao/models/products.js";
 import { isValidObjectId } from "mongoose";
+import { productService } from "../repositories/product.service.js";
 
 
 
@@ -26,7 +27,7 @@ export const getProducts = async (req = request, res = response) => {
         }
 
         // Consulta para contar total de documentos
-        const total = await productModel.countDocuments(filter);
+        const total = await productService.countDocuments(filter);
 
         // Consulta para obtener productos con paginación y ordenamiento
         const skip = (page - 1) * limit;
@@ -35,6 +36,7 @@ export const getProducts = async (req = request, res = response) => {
             .skip(skip)
             .sort(sortOptions);
 
+            console.log(productos)
         // Construcción de objeto de respuesta
         const totalPages = Math.ceil(total / limit);
         const hasNextPage = page < totalPages;
@@ -61,7 +63,7 @@ export const getProducts = async (req = request, res = response) => {
         console.error('Error en getProducts:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-}//ok
+} //me falta uno
 
 // Obtener un producto por su ID
 export const getProductsById = async (req = request, res = response) => {
@@ -73,7 +75,8 @@ export const getProductsById = async (req = request, res = response) => {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
 
-        const producto = await productModel.findById(pid);
+        const producto = await productService.getProductById(pid);
+        
         if (!producto)
             return res.status(404).json({ msg: `El producto con ID ${pid} no existe.` });
         return res.json({ producto });
@@ -82,7 +85,7 @@ export const getProductsById = async (req = request, res = response) => {
         console.error('Error en getProductsById:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-}//ok
+} //OK
 
 // Añadir un nuevo producto
 export const addProduct = async (req = request, res = response) => {
@@ -91,14 +94,14 @@ export const addProduct = async (req = request, res = response) => {
         if (!title || !description || !price || !stock || !category || !code)
             return res.status(400).json({ msg: 'Los campos title, description, price, stock, category y code son obligatorios.' });
 
-        const producto = await productModel.create({ title, description, price, thumbnail, code, stock, category, status });
+        const producto = await productService.create({ title, description, price, thumbnail, code, stock, category, status });
         return res.status(201).json({ msg: 'Producto añadido correctamente.', producto });
 
     } catch (error) {
         console.error('Error en addProduct:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-}//ok
+} //OK
 
 // Actualizar un producto por su ID
 export const updateProduct = async (req = request, res = response) => {
@@ -107,9 +110,12 @@ export const updateProduct = async (req = request, res = response) => {
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-        const producto = await productModel.findByIdAndUpdate(pid, req.body, { new: true });
-        if (!producto)
+
+        // Utiliza el productService para actualizar el producto
+        const producto = await productService.update(pid, req.body);
+        if (!producto) {
             return res.status(404).json({ msg: `No se encontró el producto con el ID ${pid}.` });
+        }
 
         return res.json({ msg: 'Producto actualizado.', producto });
 
@@ -117,7 +123,7 @@ export const updateProduct = async (req = request, res = response) => {
         console.error('Error en updateProduct:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-}
+} //OK
 
 // Eliminar un producto por su ID
 export const deleteProduct = async (req = request, res = response) => {
@@ -126,7 +132,7 @@ export const deleteProduct = async (req = request, res = response) => {
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-        const producto = await productModel.findOneAndDelete({ _id: pid });
+        const producto = await productService.delete(pid);
         if (!producto)
             return res.status(404).json({ msg: `No se encontró el producto con el ID ${pid}.` });
 
@@ -136,4 +142,4 @@ export const deleteProduct = async (req = request, res = response) => {
         console.error('Error en deleteProduct:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-}
+} //OK

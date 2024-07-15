@@ -9,7 +9,7 @@
 
 <body>
     {{#if usuario}}
-            <p>HOLA!<strong>{{usuario.nombre}}</strong> BIENVENIDO STORE!!</p>
+    <p>HOLA!<strong>{{usuario.nombre}}</strong> BIENVENIDO STORE!!</p>
     {{/if}}
     <h1>Listado de Productos</h1>
     <input type="text" value="{{carrito._id}}" id="carrito">
@@ -53,6 +53,7 @@
 </body>
 
 </html>
+
 <a href="/carrito/{{carrito._id}}">Ver carrito</a>
 
 <script src="/js/products.js"></script>
