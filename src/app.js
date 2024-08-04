@@ -9,8 +9,10 @@ import { router as productosRouter } from './routes/products.router.js';
 import { router as cartsRouter } from './routes/cart.router.js';
 import { router as vistasRouter } from './routes/views.router.js';
 import { router as ordenesRouter } from './routes/ordenes.router.js';
+import { router as loggerTest } from './routes/logger.router.js';
 
-import __dirname from './utils.js';
+
+import __dirname, { logger, middLogger } from './utils.js';
 import session from 'express-session';
 import { router as sessionRouter } from './routes/session.router.js';
 import { initPassport } from './config/passport.config.js';
@@ -22,6 +24,7 @@ import { auth } from './middleware/auth.js';
 const PORT = config.PORT;
 // Crea una instancia de la aplicación Express
 const app = express();
+app.use(middLogger)
 
 // Configura el motor de plantillas Handlebars
 app.engine('handlebars', engine({
@@ -56,6 +59,8 @@ app.use('/api/session', sessionRouter)
 app.use("/api/productos", productosRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/ordenes", ordenesRouter);
+app.use("/api/loggerTest", loggerTest );
+
 
 
 
@@ -64,7 +69,8 @@ await dbConnection();
 
 // Inicia el servidor Express en el puerto 8080
 const expressServer = app.listen( PORT , () => {
-    console.log("Servidor 8080 iniciado");
+    //console.log("Servidor 8080 iniciado");
+    logger.info("Servidor 8080 iniciado")
 }); 
 
 // Inicializa Socket.io en el servidor Express

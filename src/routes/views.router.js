@@ -40,6 +40,7 @@ router.get('/products',auth, async (req, res) => {
 })
 
 router.get('/login',(req , res)=>{
+ 
     let {error} = req.query
     res.status(200).render('login', {error})
 })
