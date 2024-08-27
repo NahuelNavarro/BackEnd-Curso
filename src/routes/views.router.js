@@ -4,6 +4,7 @@ import { ManagerMongo } from "../dao/ProductMongoManager.js";
 import { auth } from "../middleware/auth.js";
 import { createCart, getCartById } from "../controllers/carts.js";
 import { cartManagerMongo } from "../dao/CartMongoManager.js";
+import jwt from "jsonwebtoken"
 export const router = Router()
 
 router.get('/', async (req, res) => {
@@ -68,5 +69,36 @@ router.get("/carrito/:cid", async (req, res) => {
     } catch (error) {
         console.error("Error al obtener el carrito:", error);
         return res.status(500).send("Error al obtener el carrito");
+    }
+});
+
+router.get('/recovermail',(req , res)=>{
+    res.status(200).render('recovermail')
+})
+
+
+router.get('/recover', (req, res) => {
+    const PRIVATE_KEY = "CODERKEY"; // Asegúrate de usar la clave privada correcta
+    const token = req.query.token;
+
+    if (!token) {
+        return res.status(400).send('Token no proporcionado');
+    }
+
+    try {
+        // Verifica el token usando la clave privada
+        const decoded = jwt.verify(token, PRIVATE_KEY);
+        console.log("Token decoded successfully:", decoded); // Verifica el contenido del token
+
+        // Renderiza la plantilla con el email extraído del token
+        res.render('restablecercontraseña', { email: decoded.user.email });
+        console.log("Email enviado a la plantilla:", decoded.user.email);
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            console.log("Token expirado en:", error.expiredAt); // Verifica cuándo expiró el token
+            return res.status(403).send('El token ha expirado. Por favor, solicita uno nuevo.');
+        }
+        console.error("Token inválido o error durante la verificación:", error); // Detalla el error
+        return res.status(403).send('Token inválido o expirado');
     }
 });

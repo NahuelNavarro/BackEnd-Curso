@@ -9,7 +9,7 @@ class UserService{
         return await this.dao.findOne(carritoId)
     }
 
-    async getById({ email }) {
+    async getByFiltro({ email }) {
         return await this.dao.getBy({ email });
     }
 

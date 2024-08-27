@@ -26,7 +26,7 @@ export const initPassport = () => {
                     if (!nombre) {
                         return done(null, false, { message: "Nombre es requerido" });
                     }
-                    let existe = await userService.getById({email: username });
+                    let existe = await userService.getByFiltro({email: username });
                     if (existe) {
                         return done(null, false, { message: "El usuario ya existe" });
                     }
@@ -50,7 +50,7 @@ export const initPassport = () => {
             },
             async (username, password, done) => {
                 try {
-                    let usuario = await userService.getById({ email: username });
+                    let usuario = await userService.getByFiltro({ email: username });
                     if (!usuario) {
                         return done(null, false, { message: "Usuario no encontrado" });
                     }
@@ -130,7 +130,7 @@ export const initPassport = () => {
 
     passport.deserializeUser(async (id, done) => {
         try {
-            let usuario = await userService.findByIdUser({ _id: id });
+            let usuario = await userService.getByFiltro({ _id: id });
             return done(null, usuario);
         } catch (error) {
             return done(error);

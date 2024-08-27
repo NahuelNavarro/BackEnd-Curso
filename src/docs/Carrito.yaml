@@ -1,0 +1,237 @@
+openapi: 3.0.1
+info:
+  title: API de Carritos
+  version: 1.0.0
+  description: API para gestionar carritos de compras, incluyendo la creación, actualización, eliminación y compra de carritos.
+
+paths:
+  /api/carts:
+    post:
+      summary: Crea un nuevo carrito.
+      description: Crea un nuevo carrito y devuelve el carrito creado.
+      tags:
+        - Carritos
+      requestBody:
+        description: Objeto opcional para crear un carrito con productos específicos.
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productos:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productoId:
+                        type: string
+                        description: El identificador único del producto
+                      cantidad:
+                        type: integer
+                        description: La cantidad del producto
+      responses:
+        '201':
+          description: Carrito creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Mensaje de confirmación
+                  carrito:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: El identificador único del carrito
+                      productos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            productoId:
+                              type: string
+                              description: El identificador único del producto
+                            cantidad:
+                              type: integer
+                              description: La cantidad del producto en el carrito
+        '500':
+          description: Error interno del servidor
+
+  /api/carts/{cid}:
+    get:
+      summary: Obtiene un carrito por su ID.
+      description: Devuelve los detalles de un carrito específico utilizando su identificador único.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalles del carrito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carrito:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: El identificador único del carrito
+                      productos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            productoId:
+                              type: string
+                              description: El identificador único del producto
+                            cantidad:
+                              type: integer
+                              description: La cantidad del producto en el carrito
+        '404':
+          description: Carrito no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Elimina todos los productos del carrito.
+      description: Elimina todos los productos del carrito especificado.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Todos los productos eliminados del carrito exitosamente
+        '404':
+          description: Carrito no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /api/carts/{cid}/product/{pid}:
+    post:
+      summary: Agrega un producto al carrito.
+      description: Añade un producto específico al carrito.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+        - in: path
+          name: pid
+          required: true
+          description: El identificador único del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto agregado al carrito exitosamente
+        '404':
+          description: Carrito o producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /api/carts/{cid}/products/{pid}:
+    delete:
+      summary: Elimina un producto del carrito.
+      description: Elimina un producto específico del carrito.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+        - in: path
+          name: pid
+          required: true
+          description: El identificador único del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto eliminado del carrito exitosamente
+        '404':
+          description: Carrito o producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualiza la cantidad de un producto en el carrito.
+      description: Actualiza la cantidad de un producto específico en el carrito.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+        - in: path
+          name: pid
+          required: true
+          description: El identificador único del producto
+          schema:
+            type: string
+      requestBody:
+        description: Nueva cantidad del producto en el carrito.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cantidad:
+                  type: integer
+                  description: La nueva cantidad del producto en el carrito
+      responses:
+        '200':
+          description: Cantidad del producto actualizada exitosamente
+        '404':
+          description: Carrito o producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /api/carts/{cid}/purchase:
+    post:
+      summary: Realiza una compra del carrito.
+      description: Finaliza la compra del carrito especificado.
+      tags:
+        - Carritos
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: El identificador único del carrito
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compra realizada exitosamente
+        '404':
+          description: Carrito no encontrado
+        '500':
+          description: Error interno del servidor

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña</title>
+</head>
+<body>
+    <h1>Restablecer Contraseña</h1>
+    <form action="/api/user/restablecerConstrasena" method="POST">
+        <!-- Campo oculto para el email -->
+        <input type="hidden" name="email" value="{{email}}" id="email">
+        <label for="newPassword">Nueva Contraseña:</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+        <button type="submit">Restablecer Contraseña</button>
+    </form>
+</body>
+</html>

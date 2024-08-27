@@ -7,10 +7,12 @@ export class UsuarioMongoManager {
         let nuevoUsuario = await usuarioModelo.create(usuario)
         return nuevoUsuario.toJSON()
     }
+    
 
-    async getBy(filtro = {}) {
-        return await usuarioModelo.findOne(filtro).lean();
+      async getBy(filtro = {}){
+        return await usuarioModelo.findOne(filtro).lean()
     }
+
 
     async getAll() {
         console.log('Llamando a getAll()');
@@ -59,4 +61,9 @@ export class UsuarioMongoManager {
         }
     }
 
+
+   
+
+  
+    
 }

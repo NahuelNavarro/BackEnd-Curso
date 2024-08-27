@@ -10,8 +10,9 @@ import { router as cartsRouter } from './routes/cart.router.js';
 import { router as vistasRouter } from './routes/views.router.js';
 import { router as ordenesRouter } from './routes/ordenes.router.js';
 import { router as loggerTest } from './routes/logger.router.js';
-
-
+import { router as userRouter } from './routes/user.router.js';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUI from 'swagger-ui-express';
 import __dirname, { logger, middLogger } from './utils.js';
 import session from 'express-session';
 import { router as sessionRouter } from './routes/session.router.js';
@@ -20,6 +21,10 @@ import passport from 'passport';
 import { config } from './config/config.js';
 import fs from "fs"
 import { auth } from './middleware/auth.js';
+import { title } from 'process';
+import { version } from 'os';
+
+
 
 const PORT = config.PORT;
 // Crea una instancia de la aplicación Express
@@ -60,11 +65,26 @@ app.use("/api/productos", productosRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/ordenes", ordenesRouter);
 app.use("/api/loggerTest", loggerTest );
+app.use("/api/user", userRouter );
+
+const swaggerOptions = {
+    definition:{
+        openapi:'3.0.1',
+        info:{
+            title:"api abm usuarios",
+            version:"1.0.0",
+            description:"doc amb usuarios/pruega swagger"
+        },
+    },
+    apis:['./src/docs/*.yaml']
+}
+
+const specs =  swaggerJSDoc(swaggerOptions)
+
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs))
 
 
-
-
-// Conexión a la base de datos MongoDB
+// Conexión a la base de datos MongoDB 
 await dbConnection();
 
 // Inicia el servidor Express en el puerto 8080
