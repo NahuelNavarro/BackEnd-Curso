@@ -194,8 +194,6 @@ export const recoverUser = async (req, res) => {
     }
 };
 
-
-
 export const procesarRestablecimientoContraseña = async (req, res) => {
     const { email, newPassword } = req.body;
 

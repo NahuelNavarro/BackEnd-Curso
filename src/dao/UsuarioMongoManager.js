@@ -15,9 +15,7 @@ export class UsuarioMongoManager {
 
 
     async getAll() {
-        console.log('Llamando a getAll()');
         const usuarios = await usuarioModelo.find()
-        console.log('Usuarios encontrados:', usuarios);
         return usuarios;
     }
 
@@ -61,9 +59,4 @@ export class UsuarioMongoManager {
         }
     }
 
-
-   
-
-  
-    
 }
