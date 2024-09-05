@@ -36,31 +36,6 @@ describe("Products API", function () {
         await mongoose.connection.collection("productos").deleteMany({code:"..dfgmssssddddmy8"});
     });
 
-    describe("GET /api/productos/", function () {
-        it("debería traer todos los productos", async function () {
-            const response = await requester.get("/api/productos/");
-            expect(response.body.status).to.equal("success");
-            expect(response.body.payload).to.be.an("array");
-            expect(response.body.payload).to.have.lengthOf.above(0);
-            expect(response.body.payload[0]).to.have.property("title");
-            expect(response.body.payload[0]).to.have.property("price");
-        });
-    });
-
-    describe("GET /api/productos/:pid", function () {
-        it("debería traer un producto por ID", async function () {
-        
-
-            let productId = "66d90a1ae90028d46cea4c2c"; // Guardar el ID del producto creado
-
-            const getResponse = await requester.get(`/api/productos/${productId}`);
-            //console.log(getResponse.body.producto)
-            expect(getResponse.body.producto.status).equal(true);
-            expect(getResponse.body.producto).to.have.property("title");
-            expect(getResponse.body.producto).to.have.property("price");
-        });
-    });
-
     describe("POST /api/productos/", function () {
         it("Crea un producto nuevo", async function () {
             let productoNuevo = {
@@ -84,5 +59,32 @@ describe("Products API", function () {
             // Añade más expectativas según la estructura de la respuesta esperada
         });
     });
+
+    describe("GET /api/productos/", function () {
+        it("debería traer todos los productos", async function () {
+            const response = await requester.get("/api/productos/");
+            expect(response.body.status).to.equal("success");
+            expect(response.body.payload).to.be.an("array");
+            expect(response.body.payload).to.have.lengthOf.above(0);
+            expect(response.body.payload[0]).to.have.property("title");
+            expect(response.body.payload[0]).to.have.property("price");
+        });
+    });
+
+    describe("GET /api/productos/:pid", function () {
+        it("debería traer un producto por ID", async function () {
+        
+
+            let productId = "66d91319da1ba04ec3936534"; // Guardar el ID del producto creado
+
+            const getResponse = await requester.get(`/api/productos/${productId}`);
+            //console.log(getResponse.body.producto)
+            expect(getResponse.body.producto.status).equal(true);
+            expect(getResponse.body.producto).to.have.property("title");
+            expect(getResponse.body.producto).to.have.property("price");
+        });
+    });
+
+ 
 
 });
