@@ -1,6 +1,7 @@
 import { request, response } from "express";
 import { UsuarioMongoManager } from "../dao/UsuarioMongoManager.js";
 import { enviarMail, generaHash, generateToken, authToken, compararHash } from "../utils.js";
+import { userService } from "../repositories/user.service.js";
 
 const usuariosManager = new UsuarioMongoManager();
 const usuariosService = new UsuarioMongoManager()
@@ -36,7 +37,7 @@ export const registrarUsuario = async (req = request, res = response) => {
         const nuevoCarrito = await cartModel.create({ products: [] });
 
         // Crear un nuevo usuario
-        let nuevoUsuario = await usuariosManager.create({ nombre, email, password, carrito: nuevoCarrito._id });
+        let nuevoUsuario = await userService.createUser({ nombre, email, password, carrito: nuevoCarrito._id });
 
         // Actualizar el carrito para asociarlo al nuevo usuario
         await cartModel.findByIdAndUpdate(nuevoCarrito._id, { $set: { user: nuevoUsuario._id } });
