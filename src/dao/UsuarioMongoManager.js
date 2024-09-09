@@ -28,10 +28,19 @@ export class UsuarioMongoManager {
     }
 
     async updatePremiun(uid) {
-        // Cambiar solo el rol del usuario a 'premium'
+        // Encuentra el usuario por ID
+        const usuario = await usuarioModelo.findById(uid);
+        if (!usuario) {
+            throw new Error('Usuario no encontrado');
+        }
+    
+        // Determina el nuevo rol basándote en el rol actual
+        const nuevoRol = usuario.rol === 'premium' ? 'user' : 'premium';
+    
+        // Actualiza el rol del usuario
         return await usuarioModelo.updateOne(
-            { _id: uid }, 
-            { $set: { rol: 'premium' } }  // Actualiza solo el campo 'rol' a 'premium'
+            { _id: uid },
+            { $set: { rol: nuevoRol } }  // Cambia el rol del usuario
         );
     }
 

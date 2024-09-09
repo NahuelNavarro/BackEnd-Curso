@@ -10,15 +10,29 @@ const userSchema = new mongoose.Schema({
         type:[
           {
             orden:{
-              type:mongoose.Types.ObjectId,ref:'ordenes'
+              type:mongoose.Types.ObjectId, ref:'ordenes'
             }
           }
         ]
     },
-  },
-  
-  {
-    timestamps: true
-  });
+    // Nueva propiedad 'documents', un arreglo de objetos con 'name' y 'reference'
+    documents: {
+        type: [
+          {
+            name: { type: String, required: true },
+            reference: { type: String, required: true }
+          }
+        ],
+        default: []  // Default como arreglo vacío
+    },
+    // Nueva propiedad 'last_connection' de tipo Date
+    last_connection: { 
+        type: Date 
+    }
+}, 
+{
+    timestamps: true  // Para incluir createdAt y updatedAt
+});
 
+// Exportar el modelo
 export const usuarioModelo = mongoose.model('Usuarios', userSchema);

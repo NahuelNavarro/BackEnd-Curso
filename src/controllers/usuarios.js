@@ -249,16 +249,13 @@ export const cambiaPremium = async (req, res) => {
         }
 
         // Cambia el rol del usuario a 'premium' si no lo es
-        if (usuario.rol !== 'premium') {
             await usuariosService.updatePremiun(uid); // Actualiza solo el rol del usuario a 'premium'
-        } else {
-            return res.status(400).json({ message: "El usuario ya tiene el rol premium" });
-        }
+        
 
-        console.log("Usuario actualizado a premium:", usuario);
+        console.log("Usuario actualizado :", usuario);
 
         res.setHeader('Content-Type', 'application/json');
-        return res.status(200).json({ message: "El rol del usuario ha sido actualizado a premium", usuario });
+        return res.status(200).json({ message: "El rol del usuario ha sido actualizado ", usuario });
         
     } catch (error) {
         console.error("Error al actualizar el rol del usuario:", error);

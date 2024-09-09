@@ -58,7 +58,7 @@
                         if (!validaPassword(password, usuario.password)) {
                             return done(null, false, { message: "Contraseña incorrecta" });
                         }
-
+                        
                         usuario = { ...usuario };
                         delete usuario.password; // Eliminar el password y otros datos sensibles
 

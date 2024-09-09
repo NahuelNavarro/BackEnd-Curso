@@ -20,6 +20,7 @@ router.post('/login', passport.authenticate("login", { failureRedirect: "/api/se
 
     req.session.usuario = req.user;
 
+    
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({ payload: "login successful", usuario: req.user });
 });
