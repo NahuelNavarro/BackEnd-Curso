@@ -22,6 +22,10 @@ class UserService{
         return await this.dao.findById(id)
     }
 
+    async updateUser(uid){
+        return await this.dao.updatePremiun(uid)
+    }
+
 
     
   

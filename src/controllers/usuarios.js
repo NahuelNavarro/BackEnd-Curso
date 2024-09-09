@@ -232,3 +232,37 @@ export const procesarRestablecimientoContraseña = async (req, res) => {
         return res.status(500).json({ error: "Error interno del servidor" });
     }
 };
+
+export const cambiaPremium = async (req, res) => {
+    const { uid } = req.params;  // Asegúrate de usar "uid" que está en la ruta
+    
+    try {
+        // Verifica que el ID sea válido si estás usando MongoDB u otra base de datos con IDs específicos
+        if (!uid.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ error: "ID inválido" });
+        }
+
+        // Obteniendo el usuario por ID
+        let usuario = await usuariosService.findById(uid); 
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        // Cambia el rol del usuario a 'premium' si no lo es
+        if (usuario.rol !== 'premium') {
+            await usuariosService.updatePremiun(uid); // Actualiza solo el rol del usuario a 'premium'
+        } else {
+            return res.status(400).json({ message: "El usuario ya tiene el rol premium" });
+        }
+
+        console.log("Usuario actualizado a premium:", usuario);
+
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(200).json({ message: "El rol del usuario ha sido actualizado a premium", usuario });
+        
+    } catch (error) {
+        console.error("Error al actualizar el rol del usuario:", error);
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(500).json({ error: "Error al actualizar el rol del usuario" });
+    }
+};

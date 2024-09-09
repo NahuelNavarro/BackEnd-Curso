@@ -27,6 +27,14 @@ export class UsuarioMongoManager {
         return await usuarioModelo.updateOne({ _id: id }, usuario)
     }
 
+    async updatePremiun(uid) {
+        // Cambiar solo el rol del usuario a 'premium'
+        return await usuarioModelo.updateOne(
+            { _id: uid }, 
+            { $set: { rol: 'premium' } }  // Actualiza solo el campo 'rol' a 'premium'
+        );
+    }
+
     async findOne(id) {
         try {
             const usuario = await usuarioModelo.findOne({ carrito: id });

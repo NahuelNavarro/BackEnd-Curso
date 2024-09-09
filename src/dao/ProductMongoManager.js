@@ -23,8 +23,8 @@ export class ManagerMongo {
         return await productModel.countDocuments(filter)
     }
 
-    async createProduct({ title, description, price, thumbnail, code, stock, category, status }) {
-        return await productModel.create({ title, description, price, thumbnail, code, stock, category, status })
+    async createProduct({ title, description, price, thumbnail, code, stock, category, status, owner }) {
+        return await productModel.create({ title, description, price, thumbnail, code, stock, category, status, owner })
     }
 
     async updateProduct(pid, productData) {

@@ -91,17 +91,43 @@ export const getProductsById = async (req = request, res = response) => {
 export const addProduct = async (req = request, res = response) => {
     try {
         const { title, description, price, thumbnail, code, stock, category, status } = req.body;
-        if (!title || !description || !price || !stock || !category || !code)
-            return res.status(400).json({ msg: 'Los campos title, description, price, stock, category y code son obligatorios.' });
 
-        const producto = await productService.create({ title, description, price, thumbnail, code, stock, category, status });
+        // Validación de los campos requeridos
+        if (!title || !description || !price || !stock || !category || !code) {
+            return res.status(400).json({ msg: 'Los campos title, description, price, stock, category y code son obligatorios.' });
+        }
+
+        // Asegurarse de que la sesión tiene un usuario autenticado
+       if (!req.session.usuario || !req.session.usuario.email) {
+            return res.status(401).json({ msg: "Usuario no autenticado" });
+        }
+
+        // Extraer el email del usuario autenticado
+        const userEmail = req.session.usuario.email.toString(); // Convertir a cadena si es necesario
+
+        console.log('Usuario autenticado:', userEmail); // Debug para asegurar que el email está presente
+
+        // Crear el producto con el owner asignado al correo del usuario
+        const producto = await productService.create({
+            title,
+            description,
+            price,
+            thumbnail,
+            code,
+            stock,
+            category,
+            status,
+            owner: userEmail // Pasar directamente el email como string
+        });
+
+
         return res.status(201).json({ msg: 'Producto añadido correctamente.', producto });
 
     } catch (error) {
         console.error('Error en addProduct:', error);
         return res.status(500).json({ msg: 'Ocurrió un error, contacta al administrador.' });
     }
-} //OK
+};
 
 // Actualizar un producto por su ID
 export const updateProduct = async (req = request, res = response) => {

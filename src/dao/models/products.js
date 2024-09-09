@@ -11,7 +11,9 @@ const ProductShema = new Schema({
     code: { type: String, required: [true, 'El code del producto es obligatorio'], unique: true },
     stock: { type: Number, required: [true, 'El stock del producto es obligatorio'] },
     category: { type: String, required: [true, 'El category del producto es obligatorio'] },
-    status: { type: Boolean, default: true }
+    status: { type: Boolean, default: true },
+    owner: { type: String, required: true } // Asegúrate de que es del tipo String
+
 }, { collection: 'productos' });
 
 ProductShema.plugin(paginate)

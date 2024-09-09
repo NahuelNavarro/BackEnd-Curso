@@ -18,8 +18,8 @@ class ProductService{
         return await this.dao.countDocs(filter)
     }
 
-    async create({ title, description, price, thumbnail, code, stock, category, status }){
-        return await this.dao.createProduct({ title, description, price, thumbnail, code, stock, category, status })
+    async create({ title, description, price, thumbnail, code, stock, category, status,owner }){
+        return await this.dao.createProduct({ title, description, price, thumbnail, code, stock, category, status, owner })
     }
 
     async update(pid, productData) {
