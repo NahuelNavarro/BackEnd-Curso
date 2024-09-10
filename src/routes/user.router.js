@@ -10,7 +10,4 @@ router.get('/allUsers',getUsers)
 router.get('/findUsers', findUserById)
 router.get('/registrarUsuario',registrarUsuario)
 router.post('/premiun/:uid',cambiaPremium)
-
-
-
-
+router.post('/premiun/:uid/documents',cambiaPremium)
