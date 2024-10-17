@@ -1,15 +1,17 @@
-export const auth = (req, res, next) => {
+export const authDelete = (req, res, next) => {
+
     if (!req.session || !req.session.usuario) {
         return res.status(401).json({ error: 'No existen usuarios autenticados' });
     }
 
-    // Verificar qué rol tiene el usuario
-    console.log('Rol del usuario autenticado:', req.session.usuario.rol);
+  
 
     const { rol } = req.session.usuario; // Asegurarse de que el rol está en la sesión
+
     if (rol === 'user') {
-        return res.status(403).json({ error: 'No tienes permiso para realizar esta acción.' });
+        return res.status(403).json({ error: 'No tienes permiso para borrar productos.' });
     }
+
 
     next(); // Continuar si el usuario tiene permisos
 };

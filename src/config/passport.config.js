@@ -50,25 +50,34 @@
                 },
                 async (username, password, done) => {
                     try {
+                        // Buscar el usuario por su email
                         let usuario = await userService.getByFiltro({ email: username });
+                        
                         if (!usuario) {
                             return done(null, false, { message: "Usuario no encontrado" });
                         }
-
+        
+                        // Verificar si la contraseña es correcta
                         if (!validaPassword(password, usuario.password)) {
                             return done(null, false, { message: "Contraseña incorrecta" });
                         }
-                        
-                        usuario = { ...usuario };
-                        delete usuario.password; // Eliminar el password y otros datos sensibles
-
+        
+                        // Actualizar la última conexión
+                        usuario.last_connection = new Date();
+                        await userService.updateUser(usuario._id, { last_connection: usuario.last_connection });
+        
+                        // Eliminar la contraseña antes de devolver el objeto usuario
+                        delete usuario.password; // Eliminar la propiedad 'password'
+        
+                        // Devolver el usuario autenticado
                         return done(null, usuario);
                     } catch (error) {
                         return done(error);
                     }
                 }
             )
-        ); //OK
+        );
+
 
         passport.use(
             "github",

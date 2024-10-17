@@ -12,7 +12,7 @@ const ProductShema = new Schema({
     stock: { type: Number, required: [true, 'El stock del producto es obligatorio'] },
     category: { type: String, required: [true, 'El category del producto es obligatorio'] },
     status: { type: Boolean, default: true },
-    owner: { type: String, required: true } // Asegúrate de que es del tipo String
+    owner: { type: String, default: "user" } // Asegúrate de que es del tipo String
 
 }, { collection: 'productos' });
 

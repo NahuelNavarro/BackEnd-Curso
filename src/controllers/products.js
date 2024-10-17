@@ -76,7 +76,7 @@ export const getProductsById = async (req = request, res = response) => {
         }
 
         const producto = await productService.getProductById(pid);
-        
+        console.log(producto.owner)
         if (!producto)
             return res.status(404).json({ msg: `El producto con ID ${pid} no existe.` });
         return res.json({ producto });
@@ -103,7 +103,7 @@ export const addProduct = async (req = request, res = response) => {
         }
 
         // Extraer el email del usuario autenticado
-        const userEmail = req.session.usuario.email.toString(); // Convertir a cadena si es necesario
+        const userEmail = req.session.usuario.email.toString(); // Convertir a cadena si es necesarios
 
         console.log('Usuario autenticado:', userEmail); // Debug para asegurar que el email está presente
 
@@ -158,11 +158,26 @@ export const deleteProduct = async (req = request, res = response) => {
         if (!isValidObjectId(pid)) {
             return res.status(400).json({ msg: `El ID proporcionado no es válido.` });
         }
-        const producto = await productService.delete(pid);
-        if (!producto)
-            return res.status(404).json({ msg: `No se encontró el producto con el ID ${pid}.` });
+        const productoOwner = await productService.getProductById(pid);
+        console.log(productoOwner.owner)
+        const mail = req.session.usuario.email 
+        console.log(mail)
+        
+       if (mail !== productoOwner.owner ){
 
+          return res.status(400).json({ msg: `Permiso denegado, tu no has creado este producto.` });
+       }
+
+        const producto = await productService.delete(pid);
+
+       if (!producto) 
+            return res.status(404).json({ msg: `No se encontró el producto con el ID ${pid}.` });
+       
         return res.json({ msg: 'Producto eliminado.', producto });
+
+        
+
+        
 
     } catch (error) {
         console.error('Error en deleteProduct:', error);

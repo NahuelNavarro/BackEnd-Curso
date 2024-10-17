@@ -89,21 +89,58 @@ export const loginUsuario = async (req = request, res = response) => {
 }
 
 export const logOut = async (req = request, res = response) => {
-    req.session.destroy(e => {
-        if (e) {
-            console.log(error);
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(500).json(
-                {
-                    error: `Error inesperado en el servidor -Intente mas tarde`,
-                    detalle: `${error.message}`
-                }
-            )
+    try {
+        // Verifica que haya un usuario autenticado en la sesión
+        if (!req.session.usuario) {
+            return res.status(400).json({ error: "No hay usuario autenticado en la sesión" });
         }
-    })
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json({ payload: "Logout existoso" })
-}
+
+        // Actualizar la última conexión del usuario antes de cerrar sesión
+        const userId = req.session.usuario._id; // Obtener el ID del usuario desde la sesión
+        const lastConnectionDate = new Date();
+
+        // Actualiza `last_connection` en la base de datos
+        await userService.updateUser(userId, { last_connection: lastConnectionDate });
+
+        // Obtener el usuario actualizado incluyendo el campo `last_connection`
+       // let usuario = await userService.getByFiltro({ _id: userId });
+        let usuario = await userService.getByFiltro({ email: req.session.usuario.email });
+
+
+        // Verificar si el usuario existe
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        // Destruir la sesión
+        req.session.destroy(e => {
+            if (e) {
+                console.log(e);
+                res.setHeader('Content-Type', 'application/json');
+                return res.status(500).json({
+                    error: 'Error inesperado en el servidor - Intente más tarde',
+                    detalle: `${e.message}`
+                });
+            }
+
+            // Responder con éxito y mostrar el usuario actualizado
+            res.setHeader('Content-Type', 'application/json');
+            return res.status(200).json({
+                payload: "Logout exitoso",
+                usuario: {
+                    last_connection: lastConnectionDate // Añadir el campo last_connection actualizado
+                }
+            });
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: 'Error al intentar cerrar sesión',
+            detalle: `${error.message}`
+        });
+    }
+};
 
 export const error = async (req = request, res = response) => {
 
@@ -261,5 +298,70 @@ export const cambiaPremium = async (req, res) => {
         console.error("Error al actualizar el rol del usuario:", error);
         res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({ error: "Error al actualizar el rol del usuario" });
+    }
+};
+
+export const subirArchivos = async (req, res) => {
+    let { name } = req.body;
+    let { uid } = req.params;
+    
+    try {
+        // Buscar el usuario en la base de datos
+        let usuario = await usuariosService.findByIdSinLean(uid);
+
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        // Validar que se envíe el campo 'name'
+        if (!name) {
+            return res.status(400).json({ error: "Complete name" });
+        }
+
+        // Verificar si se subieron archivos
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).json({ error: "No se subió ningún archivo" });
+        }
+
+        console.log(req.files)
+
+        // Inicializar un array para almacenar los detalles de los archivos subidos
+        const archivosSubidos = [];
+
+        // Iterar sobre los diferentes campos de archivos
+        for (let campo in req.files) {
+            req.files[campo].forEach(file => {
+                // Verificar si el archivo ya existe en el array de documentos del usuario
+                const archivoExistente = usuario.documents.find(doc => doc.name === file.filename);
+
+                if (archivoExistente) {
+                    // Si ya existe, no agregarlo nuevamente
+                    return res.status(400).json({ error: `El archivo ${file.filename} ya existe en el sistema` });
+                }
+
+                // Si no existe, agregar el archivo al array de documentos del usuario
+                usuario.documents.push({
+                    name: file.filename,
+                    reference: file.path
+                });
+
+                // Agregar el archivo a la lista de archivos subidos
+                archivosSubidos.push(file);
+            });
+        }
+
+        // Guardar los cambios en la base de datos
+        await usuario.save();
+
+        // Responder con el estado actualizado del usuario y los archivos subidos
+        return res.status(200).json({
+            message: "Archivos subidos y guardados en documents",
+            files: archivosSubidos,
+            user: usuario
+        });
+
+    } catch (error) {
+        // Manejo de errores
+        return res.status(500).json({ error: "Error al subir los archivos", details: error.message });
     }
 };

@@ -26,9 +26,6 @@ class UserService{
         return await this.dao.updatePremiun(uid)
     }
 
-
-    
-  
 }
 
 export const userService =new UserService (new UsuarioMongoManager())
